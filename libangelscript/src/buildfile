@@ -2,6 +2,9 @@ intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 #import xxxx_libs += libhello%lib{hello}
 
+define masm: file
+masm{*}: extension = asm
+
 # Public headers.
 #
 pub = [dir_path] ../include/
@@ -12,9 +15,133 @@ pub_hdrs = $($pub/ pub_hdrs)
 
 lib{angelscript}: $pub/{$pub_hdrs}
 
+tgt_cls = $cxx.target.class
+tgt_cpu = $cxx.target.cpu
+tgt_sys = $cxx.target.system
+
 # Private headers and sources as well as dependencies.
 #
-lib{angelscript}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+./: lib{angelscript}: \
+  {hxx cxx}{angelscript/** -angelscript/as_callfunc_*} $impl_libs $intf_libs
+
+lib{angelscript}: cxx{angelscript/as_callfunc_x64_msvc*}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'x86_64')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_x64_gcc*}: \
+  include = ($tgt_cpu == 'x86_64' && $tgt_cls != 'windows')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_x64_mingw*}: \
+  include = ($cxx.id == 'gcc' && $tgt_cpu == 'x86_64' && $tgt_cls == 'windows')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_x86*}: \
+  include = ($tgt_cpu == 'x86')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_arm}: \
+  include = ($tgt_cpu == 'arm')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_arm64*}: \
+  include = ($tgt_cpu == 'aarch64')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_mips*}: \
+  include = ($tgt_cpu == 'mips' || $tgt_cpu == 'mips64')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_ppc}: \
+  include = ($tgt_cpu == 'powerpc')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_ppc_64*}: \
+  include = ($tgt_cpu == 'powerpc64')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_riscv64*}: \
+  include = ($tgt_cpu == 'riscv64')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_e2k*}: \
+  include = ($tgt_cpu == 'e2k')
+
+lib{angelscript}: cxx{angelscript/as_callfunc_sh4*}: \
+  include = ($tgt_cpu == 'sh4')
+
+lib{angelscript}: S{angelscript/as_callfunc_arm_gcc}: \
+  include = ($tgt_cpu == 'arm' && $cxx.id != 'msvc' && $tgt_cls != 'macos')
+
+lib{angelscript}: S{angelscript/as_callfunc_arm_xcode}: \
+  include = ($tgt_cpu == 'arm' && $tgt_cls == 'macos')
+
+lib{angelscript}: S{angelscript/as_callfunc_arm64_gcc}: \
+  include = ($tgt_cpu == 'aarch64' && $tgt_cls != 'macos')
+
+lib{angelscript}: S{angelscript/as_callfunc_arm64_xcode}: \
+  include = ($tgt_cpu == 'aarch64' && $tgt_cls == 'macos')
+
+lib{angelscript}: S{angelscript/as_callfunc_riscv64*}: \
+  include = ($tgt_cpu == 'riscv64')
+
+lib{angelscript}: S{angelscript/as_callfunc_e2k*}: \
+  include = ($tgt_cpu == 'e2k')
+
+# MASM: lib targets depend on explicit object targets. Ad-hoc rules build them.
+#
+libs{angelscript}: objs{angelscript/as_callfunc_x64_msvc_asm.masm.so.obj}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'x86_64')
+
+liba{angelscript}: obja{angelscript/as_callfunc_x64_msvc_asm.masm.a.obj}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'x86_64')
+
+libs{angelscript}: objs{angelscript/as_callfunc_arm_msvc.masm.so.obj}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'arm')
+
+liba{angelscript}: obja{angelscript/as_callfunc_arm_msvc.masm.a.obj}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'arm')
+
+libs{angelscript}: objs{angelscript/as_callfunc_arm64_msvc.masm.so.obj}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'aarch64')
+
+liba{angelscript}: obja{angelscript/as_callfunc_arm64_msvc.masm.a.obj}: \
+  include = ($tgt_sys == 'win32-msvc' && $tgt_cpu == 'aarch64')
+
+if ($tgt_sys == 'win32-msvc')
+{
+  switch $tgt_cpu
+  {
+    case 'x86_64'
+    {
+      masm_asm   = [path]    $process.search('ml64.exe')
+      masm_copts = [strings] /c /nologo
+    }
+    case 'aarch64'
+    {
+      masm_asm   = [path]    $process.search('armasm64.exe')
+      masm_copts = [strings] /nologo
+    }
+    case 'arm'
+    {
+      masm_asm   = [path]    $process.search('armasm.exe')
+      masm_copts = [strings] /nologo
+    }
+  }
+}
+
+# Dependencies of the object files on the .asm source files.
+#
+objs{angelscript/as_callfunc_x64_msvc_asm.masm.so.obj}: masm{angelscript/as_callfunc_x64_msvc_asm}
+obja{angelscript/as_callfunc_x64_msvc_asm.masm.a.obj}:  masm{angelscript/as_callfunc_x64_msvc_asm}
+objs{angelscript/as_callfunc_arm_msvc.masm.so.obj}:     masm{angelscript/as_callfunc_arm_msvc}
+obja{angelscript/as_callfunc_arm_msvc.masm.a.obj}:      masm{angelscript/as_callfunc_arm_msvc}
+objs{angelscript/as_callfunc_arm64_msvc.masm.so.obj}:   masm{angelscript/as_callfunc_arm64_msvc}
+obja{angelscript/as_callfunc_arm64_msvc.masm.a.obj}:    masm{angelscript/as_callfunc_arm64_msvc}
+
+objs{~'/(.*).masm.so/'}: masm{~'/\1/'} $masm_asm
+{{
+  diag asm ($<[0]) -> ($>[0])
+  $masm_asm $masm_copts /Fo $path($>[0]) $path($<[0]) >!
+}}
+
+obja{~'/(.*).masm.a/'}: masm{~'/\1/'} $masm_asm
+{{
+  diag asm ($<[0]) -> ($>[0])
+  $masm_asm $masm_copts /Fo $path($>[0]) $path($<[0]) >!
+}}
+
+obj{angelscript/as_callfunc_arm_gcc}: c.coptions += -Wa,-mimplicit-it=always
 
 # Build options.
 #
@@ -26,8 +153,13 @@ src_pfx_src = [dir_path] $src_root/src/
 cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
                 "-I$out_pfx_inc" "-I$src_pfx_inc"
 
-#obja{*}: cxx.poptions += -DLIBANGELSCRIPT_STATIC_BUILD
-#objs{*}: cxx.poptions += -DLIBANGELSCRIPT_SHARED_BUILD
+objs{*}: cxx.poptions += -DANGELSCRIPT_EXPORT
+
+if ($cxx.target.system != 'win32-msvc')
+  cxx.libs += -pthread
+
+if ($cxx.id == 'msvc')
+  cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -wd4996
 
 # Export options.
 #
@@ -37,8 +169,7 @@ lib{angelscript}:
   cxx.export.libs = $intf_libs
 }
 
-#liba{angelscript}: cxx.export.poptions += -DLIBANGELSCRIPT_STATIC
-#libs{angelscript}: cxx.export.poptions += -DLIBANGELSCRIPT_SHARED
+libs{angelscript}: cxx.export.poptions += -DANGELSCRIPT_DLL_LIBRARY_IMPORT
 
 # For pre-releases use the complete version to make sure they cannot
 # be used in place of another pre-release or the final version. See
@@ -51,4 +182,4 @@ else
 
 # Don't install private headers.
 #
-{hxx ixx txx}{*}: install = false
+{hxx}{*}: install = false

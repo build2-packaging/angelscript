@@ -1,3 +1,10 @@
 import libs = libangelscript%lib{angelscript}
 
-exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
+# Smoke test.
+#
+./: exe{driver}:
+{
+  test = true
+  install = false
+}
+exe{driver}: cxx{driver} $libs
