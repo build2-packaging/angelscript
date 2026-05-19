@@ -5,22 +5,29 @@ import libs  = libangelscript-addon%lib{angelscript-addon}
 for d : dir{test_* -test_build_performance}
 {
   n = $name($d)
-  ./: exe{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} \
+  ./: exe{$(n)_exe}: libul{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} \
                      $libs testscript
 }
 
-# teststdstring.cpp is broken in newer C++, so no-op it.
-# 
-exe{test_feature_exe}: cxx{teststdstring}
-
 # We disable all tests for now as they require further setup (e.g. symlink to
 # test_feature/bin/scripts dir).
+#
 exe{*}: test = false
+
+# Upstream tests register test suites via static initializers; keep whole-archive
+# so all objects are linked even if unreferenced.
+#
+libul{*}: bin.whole = true
+
+# teststdstring.cpp is broken in newer C++, so no-op it.
+#
+exe{test_feature_exe}: cxx{teststdstring}
 
 # test_build_performance is Windows-only.
 #
 ./: exe{test_build_performance_exe}: include = ($cxx.target.class == 'windows')
-exe{test_build_performance_exe}: add_on/hxx{**} test_build_performance/{hxx cxx}{source/**} $libs testscript
+exe{test_build_performance_exe}: libul{test_build_performance_exe}: \
+  add_on/hxx{**} test_build_performance/{hxx cxx}{source/**} $libs testscript
 obj{test_build_performance/**}: \
   cxx.poptions += "-I$src_base/test_build_performance/source"
 

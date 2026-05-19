@@ -14,17 +14,6 @@ for d: add_on/dir{* -autowrapper}
   libs{$tgt}: def{$tgt}: include = ($cxx.target.system == 'win32-msvc')
   def{$tgt}: libul{$tgt}
 
-  lib{$tgt}:
-  {
-    cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
-    cxx.export.libs     = $intf_libs
-  }
-
-  if $version.pre_release
-    lib{$tgt}: bin.lib.version = "-$version.project_id"
-  else
-    lib{$tgt}: bin.lib.version = "-$version.major.$version.minor"
-
   addons += lib{$tgt}
 }
 
@@ -48,7 +37,7 @@ lib{angelscript-scriptstdstring}:  lib{angelscript-scriptarray}
 
 # Aggregate - composes all individual addon libs.
 #
-lib{angelscript-addon}: $addons
+lib{angelscript-addon}: $intf_libs $addons
 
 # Build options.
 #
@@ -56,6 +45,23 @@ out_pfx_src = [dir_path] $out_root/src/
 src_pfx_src = [dir_path] $src_root/src/
 
 cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src"
+
+for d: add_on/dir{*}
+{
+  n   = $name($d)
+  tgt = angelscript-$n
+
+  lib{$tgt}:
+  {
+    cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
+    cxx.export.libs     = $intf_libs
+  }
+
+  if $version.pre_release
+    lib{$tgt}: bin.lib.version = "-$version.project_id"
+  else
+    lib{$tgt}: bin.lib.version = "-$version.major.$version.minor"
+}
 
 if ($cxx.target.system == 'mingw32')
 {
@@ -83,7 +89,7 @@ if ($cxx.stdlib == 'libstdc++')
 lib{angelscript-addon}:
 {
   cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
-  cxx.export.libs     = $addons
+  cxx.export.libs     = $intf_libs $addons
 }
 
 lib{angelscript-scriptdictionary}:
