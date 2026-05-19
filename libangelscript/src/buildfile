@@ -151,7 +151,8 @@ out_pfx_src = [dir_path] $out_root/src/
 src_pfx_src = [dir_path] $src_root/src/
 
 cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
-                "-I$out_pfx_inc" "-I$src_pfx_inc"
+                "-I$out_pfx_inc" "-I$src_pfx_inc" \
+                ($config.libangelscript.no_exceptions ? '-DAS_NO_EXCEPTIONS':)
 
 objs{*}: cxx.poptions += -DANGELSCRIPT_EXPORT
 
@@ -165,8 +166,10 @@ if ($cxx.id == 'msvc')
 #
 lib{angelscript}:
 {
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
+  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc" \
+                        ($config.libangelscript.no_exceptions ? '-DAS_NO_EXCEPTIONS':)
   cxx.export.libs = $intf_libs
+  libangelscript.no_exceptions = [bool] $config.libangelscript.no_exceptions
 }
 
 libs{angelscript}: cxx.export.poptions += -DANGELSCRIPT_DLL_LIBRARY_IMPORT

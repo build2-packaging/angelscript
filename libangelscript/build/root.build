@@ -12,3 +12,5 @@ hxx{*}: extension = h
 cxx{*}: extension = cpp
 
 test.target = $cxx.target
+
+[bool] config.libangelscript.no_exceptions =? false
