@@ -5,16 +5,17 @@ import libs  = libangelscript-addon%lib{angelscript-addon}
 for d : dir{test_* -test_build_performance}
 {
   n = $name($d)
-  ./: exe{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} $libs testscript
+  ./: exe{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} \
+                     $libs testscript
 }
-
-# We disable all tests for now as they require further setup (e.g. symlink to
-# test_feature/bin/scripts dir).
-exe{*}: test = false
 
 # teststdstring.cpp is broken in newer C++, so no-op it.
 # 
 exe{test_feature_exe}: cxx{teststdstring}
+
+# We disable all tests for now as they require further setup (e.g. symlink to
+# test_feature/bin/scripts dir).
+exe{*}: test = false
 
 # test_build_performance is Windows-only.
 #
@@ -49,6 +50,7 @@ elif ($cxx.target.class == 'windows')
 # Upstream relies on relative includes to 'add_on/', so we use dummy include
 # directories to satisfy them.
 #
+./: file{1/2/3/leave.me}
 cxx.poptions =+ "-I$src_base/1/2" "-I$src_base/1/2/3"
 
 if ($cxx.target.class == 'macos')
