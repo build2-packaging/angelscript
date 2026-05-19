@@ -1,15 +1,15 @@
 import intf_libs = libangelscript%lib{angelscript}
 
-# One lib per add_on subdirectory.
+# One lib per angelscript/* subdirectory.
 # autowrapper is header-only with a standalone generator - excluded.
 #
 addons =
-for d: add_on/dir{* -autowrapper}
+for d: angelscript/dir{* -autowrapper}
 {
   n   = $name($d)
   tgt = angelscript-$n
 
-  lib{$tgt}: libul{$tgt}: add_on/$n/{hxx cxx}{**} $intf_libs
+  lib{$tgt}: libul{$tgt}: angelscript/$n/{hxx cxx}{**} $intf_libs
 
   libs{$tgt}: def{$tgt}: include = ($cxx.target.system == 'win32-msvc')
   def{$tgt}: libul{$tgt}
@@ -18,7 +18,7 @@ for d: add_on/dir{* -autowrapper}
 }
 
 lib{angelscript-autowrapper}: libul{angelscript-autowrapper}: \
-                              add_on/autowrapper/{hxx cxx}{** -generator/*} $intf_libs
+                              angelscript/autowrapper/{hxx cxx}{** -generator/*} $intf_libs
 
 libs{angelscript-autowrapper}: def{angelscript-autowrapper}: include = ($cxx.target.system == 'win32-msvc')
 def{angelscript-autowrapper}: libul{angelscript-autowrapper}
@@ -27,7 +27,7 @@ addons += lib{angelscript-autowrapper}
 
 # Generator - produces aswrappedcall.h (written to stdout).
 #
-exe{angelscript-generateheader}: add_on/autowrapper/generator/{hxx cxx}{**}
+exe{angelscript-generateheader}: angelscript/autowrapper/generator/{hxx cxx}{**}
 
 # Inter-addon prerequisites.
 #
@@ -41,20 +41,20 @@ lib{angelscript-addon}: $intf_libs $addons
 
 # Build options.
 #
-out_pfx_src = [dir_path] $out_root/src/
-src_pfx_src = [dir_path] $src_root/src/
+src_pfx_src = [dir_path] $src_root/src
 
-cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src"
+cxx.poptions =+ "-I$src_pfx_src"
 
-for d: add_on/dir{*}
+for d: angelscript/dir{*}
 {
   n   = $name($d)
   tgt = angelscript-$n
 
   lib{$tgt}:
   {
-    cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
-    cxx.export.libs     = $intf_libs
+    cxx.export.poptions   = "-I$src_pfx_src" "-I$src_pfx_src/angelscript"
+    cxx.export.libs       = $intf_libs
+    cxx.pkgconfig.include = include/ include/angelscript/
   }
 
   if $version.pre_release
@@ -74,7 +74,7 @@ elif ($cxx.target.class == 'windows')
 # ISO-8859-1 sources: suppress UTF-8 charset warning on MSVC.
 #
 if ($cxx.id == 'msvc')
-  add_on/scriptstdstring/obj{scriptstdstring scriptstdstring_utils}: \
+  angelscript/scriptstdstring/obj{scriptstdstring scriptstdstring_utils}: \
     cxx.poptions += /wd4828
 
 # locale_t/newlocale/uselocale may (sometimes) require _GNU_SOURCE with
@@ -88,8 +88,9 @@ if ($cxx.stdlib == 'libstdc++')
 #
 lib{angelscript-addon}:
 {
-  cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
-  cxx.export.libs     = $intf_libs $addons
+  cxx.export.poptions   = "-I$src_pfx_src" "-I$src_pfx_src/angelscript"
+  cxx.export.libs       = $intf_libs $addons
+  cxx.pkgconfig.include = include/ include/angelscript/
 }
 
 lib{angelscript-scriptdictionary}:
@@ -114,6 +115,10 @@ if $version.pre_release
 else
   lib{angelscript-addon}: bin.lib.version = "-$version.major.$version.minor"
 
-# Don't install private headers.
+# Install recreating subdirectories.
 #
-{hxx}{*}: install = false
+{hxx}{*}:
+{
+  install         = include/
+  install.subdirs = true
+}

@@ -1,0 +1,1 @@
+../../../upstream/sdk/angelscript/include/angelscript.h

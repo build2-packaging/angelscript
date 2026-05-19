@@ -19,3 +19,4 @@
 #*.png binary
 
 libangelscript/src/angelscript symlink=dir
+libangelscript-addon/src/angelscript symlink=dir

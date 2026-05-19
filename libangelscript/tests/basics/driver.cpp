@@ -1,4 +1,5 @@
 #include <angelscript.h>
+#include <angelscript/angelscript.h>
 
 #undef NDEBUG
 #include <cassert>

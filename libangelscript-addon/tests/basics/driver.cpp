@@ -1,5 +1,7 @@
-#include <add_on/scriptarray/scriptarray.h>
 #include <angelscript.h>
+#include <angelscript/angelscript.h>
+#include <angelscript/scriptarray/scriptarray.h>
+#include <scriptarray/scriptarray.h>
 
 #undef NDEBUG
 #include <cassert>

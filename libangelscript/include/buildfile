@@ -9,3 +9,10 @@ pub_hdrs = {hxx}{**}
   install         = include/
   install.subdirs = true
 }
+
+# Don't install the top-level shim - upstream relative includes
+# ("../include/angelscript.h") require it in the source tree (found via
+# "-I.../include" or "-I.../src") but consumers use either
+# <angelscript/angelscript.h> or <angelscript.h>.
+#
+hxx{angelscript}@./: install = false
