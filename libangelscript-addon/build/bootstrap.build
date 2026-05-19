@@ -1,0 +1,7 @@
+project = libangelscript-addon
+
+using version
+using config
+using test
+using install
+using dist
