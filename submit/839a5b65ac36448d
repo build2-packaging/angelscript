@@ -1,0 +1,7 @@
+: 1
+name: libangelscript
+version: 2.38.0
+language: c++
+project: angelscript
+summary: AngelScript embedded scripting language library
+license: Zlib
