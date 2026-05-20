@@ -17,7 +17,3 @@
 # Use `binary` to make sure certain files are never auto-detected as text.
 #
 #*.png binary
-
-libangelscript/src/angelscript symlink=dir
-libangelscript-addon/src/angelscript symlink=dir
-libangelscript-addon/tests/upstream/add_on symlink=dir

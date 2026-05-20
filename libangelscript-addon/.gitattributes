@@ -1,0 +1,5 @@
+src/angelscript                       symlink=dir
+tests/upstream/add_on                 symlink=dir
+tests/upstream/test_build_performance symlink=dir
+tests/upstream/test_feature           symlink=dir
+tests/upstream/test_performance       symlink=dir
