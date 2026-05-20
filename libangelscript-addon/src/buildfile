@@ -9,7 +9,7 @@ for d: angelscript/dir{* -autowrapper}
   n   = $name($d)
   tgt = angelscript-$n
 
-  lib{$tgt}: libul{$tgt}: angelscript/$n/{hxx cxx}{**} $intf_libs
+  ./: lib{$tgt}: libul{$tgt}: angelscript/$n/{hxx cxx}{**} $intf_libs
 
   libs{$tgt}: def{$tgt}: include = ($cxx.target.system == 'win32-msvc')
   def{$tgt}: libul{$tgt}
@@ -17,7 +17,7 @@ for d: angelscript/dir{* -autowrapper}
   addons += lib{$tgt}
 }
 
-lib{angelscript-autowrapper}: libul{angelscript-autowrapper}: \
+./: lib{angelscript-autowrapper}: libul{angelscript-autowrapper}: \
                               angelscript/autowrapper/{hxx cxx}{** -generator/*} $intf_libs
 
 libs{angelscript-autowrapper}: def{angelscript-autowrapper}: include = ($cxx.target.system == 'win32-msvc')
@@ -27,7 +27,7 @@ addons += lib{angelscript-autowrapper}
 
 # Generator - produces aswrappedcall.h (written to stdout).
 #
-exe{angelscript-generateheader}: angelscript/autowrapper/generator/{hxx cxx}{**}
+./: exe{angelscript-generateheader}: angelscript/autowrapper/generator/{hxx cxx}{**}
 
 # Inter-addon prerequisites.
 #
@@ -37,7 +37,7 @@ lib{angelscript-scriptstdstring}:  lib{angelscript-scriptarray}
 
 # Aggregate - composes all individual addon libs.
 #
-lib{angelscript-addon}: $intf_libs $addons
+./: lib{angelscript-addon}: $intf_libs $addons
 
 # Build options.
 #
