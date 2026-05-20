@@ -100,24 +100,42 @@ liba{angelscript}: obja{angelscript/as_callfunc_arm64_msvc.masm.a.obj}: \
 
 if ($tgt_sys == 'win32-msvc')
 {
+  masm_asm = [path]
+  masm_copts = [strings] /nologo
   switch $tgt_cpu
   {
     case 'x86_64'
     {
-      masm_asm   = [path]    $process.search('ml64.exe')
       masm_copts = [strings] /c /nologo
+      if($cxx.id == 'msvc')
+        masm_asm = [path] 'ml64.exe'
+      elif($cxx.id == 'clang')
+      {
+        masm_asm = [path] 'llvm-ml.exe'
+        masm_copts += --m64
+      }
     }
     case 'aarch64'
     {
-      masm_asm   = [path]    $process.search('armasm64.exe')
-      masm_copts = [strings] /nologo
+      masm_asm   = [path] 'armasm64.exe'
     }
     case 'arm'
     {
-      masm_asm   = [path]    $process.search('armasm.exe')
-      masm_copts = [strings] /nologo
+      masm_asm   = [path] 'armasm.exe'
     }
   }
+
+  # Try searching first in the compilers directory then in PATH.
+  #
+  cxx_dir = [dir_path] $directory($effect($cxx.path))
+  ml_path = [path] $cxx_dir/$path_search("*$masm_asm", $cxx_dir)
+  if ($empty($ml_path))
+  {
+    ml_path = [path] $process.search($masm_asm)
+  }
+
+  assert (!$null($ml_path) && $file_exists($ml_path)) "failed to find assembler: $masm_asm"
+  masm_asm = [path] $ml_path
 }
 
 # Dependencies of the object files on the .asm source files.
