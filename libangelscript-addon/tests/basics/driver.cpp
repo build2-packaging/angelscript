@@ -1,34 +1,12 @@
-#include <sstream>
-#include <stdexcept>
-
-#include <angelscript-addon.hpp>
+#include <add_on/scriptarray/scriptarray.h>
+#include <angelscript.h>
 
 #undef NDEBUG
 #include <cassert>
 
-int main ()
-{
-  using namespace std;
-  using namespace angelscript_addon;
-
-  // Basics.
-  //
-  {
-    ostringstream o;
-    say_hello (o, "World");
-    assert (o.str () == "Hello, World!\n");
-  }
-
-  // Empty name.
-  //
-  try
-  {
-    ostringstream o;
-    say_hello (o, "");
-    assert (false);
-  }
-  catch (const invalid_argument& e)
-  {
-    assert (e.what () == string ("empty name"));
-  }
+int main() {
+  asIScriptEngine *engine = asCreateScriptEngine();
+  assert(engine != nullptr);
+  RegisterScriptArray(engine, true);
+  engine->ShutDownAndRelease();
 }

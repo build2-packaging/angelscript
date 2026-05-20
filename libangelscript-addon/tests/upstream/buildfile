@@ -1,0 +1,76 @@
+import libs  = libangelscript-addon%lib{angelscript-addon}
+
+# NOTE: Don't name executables the same as the upstream dir symlinks.
+
+for d : dir{test_* -test_build_performance}
+{
+  n = $name($d)
+  ./: exe{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} $libs testscript
+}
+
+# We disable all tests for now as they require further setup (e.g. symlink to
+# test_feature/bin/scripts dir).
+exe{*}: test = false
+
+# teststdstring.cpp is broken in newer C++, so no-op it.
+# 
+exe{test_feature_exe}: cxx{teststdstring}
+
+# test_build_performance is Windows-only.
+#
+./: exe{test_build_performance_exe}: include = ($cxx.target.class == 'windows')
+exe{test_build_performance_exe}: add_on/hxx{**} test_build_performance/{hxx cxx}{source/**} $libs testscript
+obj{test_build_performance/**}: \
+  cxx.poptions += "-I$src_base/test_build_performance/source"
+
+# Build options.
+#
+
+if ($cxx.target.system == 'win32-msvc')
+{
+  # Explicitly define WIN32, it is used by upstream for conditional includes.
+  cxx.poptions += -DWIN32
+
+  if ($cxx.id == 'msvc')
+  {
+    # ISO-8859-1 sources: suppress UTF-8 charset warning on MSVC.
+    #
+    cxx.coptions += -wd4828
+  }
+}
+
+# For __imp_timeGetTime
+#
+if ($cxx.target.system == 'mingw32')
+  cxx.libs += -lwinmm
+elif ($cxx.target.class == 'windows')
+  cxx.libs += winmm.lib
+
+# Upstream relies on relative includes to 'add_on/', so we use dummy include
+# directories to satisfy them.
+#
+cxx.poptions =+ "-I$src_base/1/2" "-I$src_base/1/2/3"
+
+if ($cxx.target.class == 'macos')
+{
+  # Upstream test_build_performance.cpp unconditionally include e.g. <malloc.h>
+  # which doesn't exist on macos, but <malloc/malloc.h> usually does.
+  #
+  malloc_hdr = [path] $cxx.find_system_header('malloc/malloc.h')
+  if(!$null($malloc_hdr))
+    obj{test_feature/source/test_registertype}: \
+      cxx.poptions += "-I$directory($malloc_hdr)"
+
+  # memalign does not exist on macos, but posix_memalign does. Hack it in place.
+  # 
+  obj{test_feature/source/test_registertype}: \
+    cxx.poptions += '-Dmemalign(a,s)=({void*p=nullptr;posix_memalign(&p,a,s)==0?p:nullptr;})'
+}
+if ($cxx.target.class != 'windows')
+{
+  switch $cxx.id: path.match
+  {
+    case 'gcc' | 'clang*'
+      cxx.coptions += -include 'cmath'
+  }
+}

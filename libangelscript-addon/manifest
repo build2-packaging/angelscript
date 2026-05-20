@@ -1,15 +1,18 @@
 : 1
 name: libangelscript-addon
-version: 0.1.0-a.0.z
+version: 2.38.0-a.0.z
 language: c++
-project: build2-angelscript
-summary: AngelScript
-license: other: proprietary ; Not free/open source.
+project: angelscript
+summary: AngelScript embedded scripting language addon library
+license: Zlib
 description-file: README.md
 package-description-file: PACKAGE-README.md
-url: https://example.org/upstream
+url: https://www.angelcode.com/angelscript/
+doc-url: https://www.angelcode.com/angelscript/sdk/docs/manual/index.html
+src-url: https://github.com/anjo76/angelscript
 email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-angelscript
+package-url: https://github.com/build2-packaging/angelscript
 package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
+depends: libangelscript == $

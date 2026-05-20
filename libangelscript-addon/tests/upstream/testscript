@@ -1,0 +1,4 @@
+: angelscript addon tests
+{
+  true | $* >! 2>|
+}

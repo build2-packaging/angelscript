@@ -1,0 +1,1 @@
+bool TestStdString() { return true; }

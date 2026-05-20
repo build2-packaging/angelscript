@@ -1,44 +1,103 @@
-intf_libs = # Interface dependencies.
-impl_libs = # Implementation dependencies.
-#import xxxx_libs += libhello%lib{hello}
+import intf_libs = libangelscript%lib{angelscript}
 
-# Public headers.
+# One lib per add_on subdirectory.
+# autowrapper is header-only with a standalone generator - excluded.
 #
-pub = [dir_path] ../include/
+addons =
+for d: add_on/dir{* -autowrapper}
+{
+  n   = $name($d)
+  tgt = angelscript-$n
 
-include $pub
+  lib{$tgt}: libul{$tgt}: add_on/$n/{hxx cxx}{**} $intf_libs
 
-pub_hdrs = $($pub/ pub_hdrs)
+  libs{$tgt}: def{$tgt}: include = ($cxx.target.system == 'win32-msvc')
+  def{$tgt}: libul{$tgt}
 
-lib{angelscript-addon}: $pub/{$pub_hdrs}
+  lib{$tgt}:
+  {
+    cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
+    cxx.export.libs     = $intf_libs
+  }
 
-# Private headers and sources as well as dependencies.
+  if $version.pre_release
+    lib{$tgt}: bin.lib.version = "-$version.project_id"
+  else
+    lib{$tgt}: bin.lib.version = "-$version.major.$version.minor"
+
+  addons += lib{$tgt}
+}
+
+lib{angelscript-autowrapper}: libul{angelscript-autowrapper}: \
+                              add_on/autowrapper/{hxx cxx}{** -generator/*} $intf_libs
+
+libs{angelscript-autowrapper}: def{angelscript-autowrapper}: include = ($cxx.target.system == 'win32-msvc')
+def{angelscript-autowrapper}: libul{angelscript-autowrapper}
+
+addons += lib{angelscript-autowrapper}
+
+# Generator - produces aswrappedcall.h (written to stdout).
 #
-lib{angelscript-addon}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+exe{angelscript-generateheader}: add_on/autowrapper/generator/{hxx cxx}{**}
+
+# Inter-addon prerequisites.
+#
+lib{angelscript-scriptdictionary}: lib{angelscript-scriptarray}
+lib{angelscript-scriptfile}:       lib{angelscript-scriptarray} lib{angelscript-datetime}
+lib{angelscript-scriptstdstring}:  lib{angelscript-scriptarray}
+
+# Aggregate - composes all individual addon libs.
+#
+lib{angelscript-addon}: $addons
 
 # Build options.
 #
-out_pfx_inc = [dir_path] $out_root/include/
-src_pfx_inc = [dir_path] $src_root/include/
 out_pfx_src = [dir_path] $out_root/src/
 src_pfx_src = [dir_path] $src_root/src/
 
-cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
-                "-I$out_pfx_inc" "-I$src_pfx_inc"
+cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src"
 
-#obja{*}: cxx.poptions += -DLIBANGELSCRIPT_ADDON_STATIC_BUILD
-#objs{*}: cxx.poptions += -DLIBANGELSCRIPT_ADDON_SHARED_BUILD
+if ($cxx.target.system == 'mingw32')
+{
+  cxx.loptions += -Wl,--export-all-symbols
+  lib{angelscript-scriptsocket angelscript-addon}: cxx.libs += -lws2_32
+}
+elif ($cxx.target.class == 'windows')
+  lib{angelscript-scriptsocket angelscript-addon}: cxx.libs += ws2_32.lib
+
+# ISO-8859-1 sources: suppress UTF-8 charset warning on MSVC.
+#
+if ($cxx.id == 'msvc')
+  add_on/scriptstdstring/obj{scriptstdstring scriptstdstring_utils}: \
+    cxx.poptions += /wd4828
+
+# locale_t/newlocale/uselocale may (sometimes) require _GNU_SOURCE with
+# libstdc++.
+#
+if ($cxx.stdlib == 'libstdc++')
+  angelscript/scriptstdstring/obj{scriptstdstring}: \
+    cxx.poptions += -D_GNU_SOURCE
 
 # Export options.
 #
 lib{angelscript-addon}:
 {
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs
+  cxx.export.poptions = "-I$out_pfx_src" "-I$src_pfx_src"
+  cxx.export.libs     = $addons
 }
 
-#liba{angelscript-addon}: cxx.export.poptions += -DLIBANGELSCRIPT_ADDON_STATIC
-#libs{angelscript-addon}: cxx.export.poptions += -DLIBANGELSCRIPT_ADDON_SHARED
+lib{angelscript-scriptdictionary}:
+{
+  cxx.export.libs += lib{angelscript-scriptarray}
+}
+lib{angelscript-scriptfile}:
+{
+  cxx.export.libs += lib{angelscript-scriptarray} lib{angelscript-datetime}
+}
+lib{angelscript-scriptstdstring}:
+{
+  cxx.export.libs += lib{angelscript-scriptarray}
+}
 
 # For pre-releases use the complete version to make sure they cannot
 # be used in place of another pre-release or the final version. See
@@ -51,4 +110,4 @@ else
 
 # Don't install private headers.
 #
-{hxx ixx txx}{*}: install = false
+{hxx}{*}: install = false
