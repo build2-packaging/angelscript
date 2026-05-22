@@ -175,8 +175,16 @@ objs{*}: cxx.poptions += -DANGELSCRIPT_EXPORT
 if ($cxx.target.system != 'win32-msvc')
   cxx.libs += -pthread
 
-if ($cxx.id == 'msvc')
-  cxx.poptions += -D_CRT_SECURE_NO_WARNINGS -wd4996
+switch $cxx.id: path.match
+{
+  case 'gcc' | 'clang*'
+    cxx.coptions += -Wno-extra \
+                    -Wno-pedantic \
+                    ($cxx.target.class == 'macos' ? -Wno-deprecated-declarations :)
+  case 'msvc*'
+    cxx.poptions += -D_CRT_SECURE_NO_WARNINGS \
+                    -wd4996
+}
 
 # Export options.
 #

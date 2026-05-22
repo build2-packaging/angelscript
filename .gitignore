@@ -6,4 +6,5 @@
 
 # Compilation database.
 #
+.cache/
 compile_commands.json
