@@ -84,6 +84,15 @@ if ($cxx.stdlib == 'libstdc++')
   angelscript/scriptstdstring/obj{scriptstdstring}: \
     cxx.poptions += -D_GNU_SOURCE
 
+switch $cxx.id: path.match
+{
+  case 'gcc' | 'clang*'
+    cxx.coptions += -Wno-extra \
+                    -Wno-pedantic \
+                    -Wno-invalid-utf8 \
+                    ($cxx.target.class == 'macos' ? -Wno-deprecated-declarations :)
+}
+
 # Export options.
 #
 lib{angelscript-addon}:
