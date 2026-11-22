@@ -178,9 +178,18 @@ if ($cxx.target.system != 'win32-msvc')
 switch $cxx.id: path.match
 {
   case 'gcc' | 'clang*'
-    cxx.coptions += -Wno-extra \
-                    -Wno-pedantic \
-                    ($cxx.target.class == 'macos' ? -Wno-deprecated-declarations :)
+  {
+    # Benign warnings in upstream code: unused entities, sign comparisons,
+    # method pointer casts (see asMETHOD() in angelscript.h), deprecated
+    # functions, possibly uninitialized variables, and pedantic diagnostics.
+    #
+    cxx.coptions += -Wno-pedantic -Wno-unused -Wno-unused-parameter \
+                    -Wno-sign-compare -Wno-cast-function-type \
+                    -Wno-deprecated-declarations
+
+    if ($cxx.id == 'gcc')
+      cxx.coptions += -Wno-maybe-uninitialized
+  }
   case 'msvc*'
     cxx.poptions += -D_CRT_SECURE_NO_WARNINGS \
                     -wd4996
