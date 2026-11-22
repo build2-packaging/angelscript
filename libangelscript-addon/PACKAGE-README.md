@@ -12,7 +12,7 @@ To start using `libangelscript-addon` in your project, add the following `depend
 value to your `manifest`, adjusting the version constraint as appropriate:
 
 ```
-depends: libangelscript-addon ^2.38.0
+depends: libangelscript-addon ^2.39.0
 ```
 
 Then import the library in your `buildfile`:

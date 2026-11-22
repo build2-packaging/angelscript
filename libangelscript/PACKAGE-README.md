@@ -11,7 +11,7 @@ To start using `libangelscript` in your project, add the following `depends`
 value to your `manifest`, adjusting the version constraint as appropriate:
 
 ```
-depends: libangelscript ^2.38.0
+depends: libangelscript ^2.39.0
 ```
 
 Then import the library in your `buildfile`:
