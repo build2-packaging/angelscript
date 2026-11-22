@@ -45,6 +45,16 @@ if ($cxx.target.system == 'win32-msvc')
     #
     cxx.coptions += -wd4828
   }
+  elif ($cxx.id == 'clang')
+  {
+    # test_registertype.cpp has an intentionally ill-formed array in an
+    # unused template under _MSC_VER, which only MSVC tolerates. Delay
+    # template parsing so that Clang skips it as well.
+    #
+    obj{test_feature/source/test_registertype}: \
+      cxx.coptions += -fdelayed-template-parsing \
+                      -Wno-delayed-template-parsing-in-cxx20
+  }
 }
 
 # For __imp_timeGetTime
