@@ -5,6 +5,8 @@ language: c++
 project: angelscript
 summary: AngelScript embedded scripting language library
 license: Zlib
+topics: scripting engine, script compiler, bytecode virtual machine, application extension, game development
+keywords: interpreter bytecode vm compiler gamedev
 description-file: README.md
 package-description-file: PACKAGE-README.md
 url: https://www.angelcode.com/angelscript/

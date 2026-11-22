@@ -5,6 +5,8 @@ language: c++
 project: angelscript
 summary: AngelScript embedded scripting language addon library
 license: Zlib
+topics: scripting engine, script standard library, script containers, script debugger, script serialization
+keywords: array dictionary string debugger serializer
 description-file: README.md
 package-description-file: PACKAGE-README.md
 url: https://www.angelcode.com/angelscript/
