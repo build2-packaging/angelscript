@@ -1,6 +1,6 @@
 : 1
 name: libangelscript-addon
-version: 2.39.0-a.0.z
+version: 2.39.0
 language: c++
 project: angelscript
 summary: AngelScript embedded scripting language addon library
