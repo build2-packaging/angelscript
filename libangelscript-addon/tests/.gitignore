@@ -1,9 +1,9 @@
 # Test executables.
 #
 driver
+*_exe
 
 # Testscript output directories (can be symlinks).
 #
 test
 test-*
-test_*
