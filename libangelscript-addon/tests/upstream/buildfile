@@ -34,6 +34,44 @@ obj{test_build_performance/**}: \
 # Build options.
 #
 
+# Benign warnings in upstream test code: unused entities, deprecated or unsafe
+# functions, ISO-8859-1 sources, as well as sloppy but intentional code (sign
+# comparisons, member initialization order, format strings, offsetof on
+# non-standard-layout types, and the like). Keep this before any
+# target-specific cxx.coptions append below, since those copy the value at
+# that point.
+#
+if ($cxx.class == 'gcc')
+{
+  cxx.coptions += -Wno-unused -Wno-unused-parameter -Wno-deprecated-declarations \
+                  -Wno-sign-compare -Wno-reorder -Wno-format -Wno-parentheses \
+                  -Wno-attributes -Wno-address -Wno-invalid-offsetof \
+                  -Wno-delete-non-virtual-dtor -Wno-deprecated-copy \
+                  -Wno-ignored-qualifiers -Wno-cast-function-type \
+                  -Wno-type-limits
+
+  if ($cxx.id.type == 'clang')
+    cxx.coptions += -Wno-invalid-source-encoding -Wno-self-assign \
+                    -Wno-tautological-undefined-compare
+  else
+  {
+    cxx.coptions += -Wno-maybe-uninitialized
+
+    # -Walloc-size is only known to GCC 14 or later.
+    #
+    if ($cxx.version.major >= 14)
+      cxx.coptions += -Wno-alloc-size
+  }
+
+  # -Winvalid-utf8 is only known to GCC 13 and Clang 15 or later.
+  #
+  if (($cxx.id == 'gcc'        && $cxx.version.major >= 13) || \
+      ($cxx.id.type == 'clang' && $cxx.version.major >= 15))
+    cxx.coptions += -Wno-invalid-utf8
+}
+else
+  cxx.coptions += -wd4996 -wd4100 -wd4101 -wd4189 -wd4244
+
 if ($cxx.target.system == 'win32-msvc')
 {
   # Explicitly define WIN32, it is used by upstream for conditional includes.

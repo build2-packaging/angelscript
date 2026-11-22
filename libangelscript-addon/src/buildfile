@@ -71,12 +71,6 @@ if ($cxx.target.system == 'mingw32')
 elif ($cxx.target.class == 'windows')
   lib{angelscript-scriptsocket angelscript-addon}: cxx.libs += ws2_32.lib
 
-# ISO-8859-1 sources: suppress UTF-8 charset warning on MSVC.
-#
-if ($cxx.id == 'msvc')
-  angelscript/scriptstdstring/obj{scriptstdstring scriptstdstring_utils}: \
-    cxx.poptions += /wd4828
-
 # locale_t/newlocale/uselocale may (sometimes) require _GNU_SOURCE with
 # libstdc++.
 #
@@ -84,14 +78,25 @@ if ($cxx.stdlib == 'libstdc++')
   angelscript/scriptstdstring/obj{scriptstdstring}: \
     cxx.poptions += -D_GNU_SOURCE
 
-switch $cxx.id: path.match
+# Benign warnings in upstream code: unused entities, unsigned comparisons
+# against 0, method pointer casts (see asMETHOD() in angelscript.h),
+# deprecated or unsafe functions, MSVC-specific pragmas, ISO-8859-1 sources,
+# and pedantic diagnostics.
+#
+if ($cxx.class == 'gcc')
 {
-  case 'gcc' | 'clang*'
-    cxx.coptions += -Wno-extra \
-                    -Wno-pedantic \
-                    -Wno-invalid-utf8 \
-                    ($cxx.target.class == 'macos' ? -Wno-deprecated-declarations :)
+  cxx.coptions += -Wno-pedantic -Wno-unused -Wno-unused-parameter \
+                  -Wno-type-limits -Wno-cast-function-type \
+                  -Wno-deprecated-declarations -Wno-unknown-pragmas
+
+  # -Winvalid-utf8 is only known to GCC 13 and Clang 15 or later.
+  #
+  if (($cxx.id == 'gcc'        && $cxx.version.major >= 13) || \
+      ($cxx.id.type == 'clang' && $cxx.version.major >= 15))
+    cxx.coptions += -Wno-invalid-utf8
 }
+else
+  cxx.coptions += -wd4996 -wd4828
 
 # Export options.
 #

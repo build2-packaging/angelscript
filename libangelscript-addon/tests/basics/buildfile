@@ -1,3 +1,9 @@
 import libs = libangelscript-addon%lib{angelscript-addon}
 
 exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
+
+# Benign unused parameter in the upstream public header (see asSMethodPtr in
+# angelscript.h).
+#
+if ($cxx.class == 'gcc')
+  cxx.coptions += -Wno-unused-parameter
