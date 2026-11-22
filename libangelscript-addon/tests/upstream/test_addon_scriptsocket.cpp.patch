@@ -1,0 +1,16 @@
+--- test_addon_scriptsocket.cpp.orig	2026-11-22 03:32:12
++++ test_addon_scriptsocket.cpp	2026-11-22 16:14:08
+@@ -17,6 +17,13 @@
+ 
+ bool Test()
+ {
++	// Skipped in the build2 package: the test talks to itself over a fixed
++	// localhost port with a fixed number of scheduling rounds, so its outcome
++	// is timing dependent (see the "race conditions with the socket" note in
++	// upstream's sdk/tests/test_feature/source/test_addon_scriptsocket.cpp).
++	PRINTF("Skipping test Addon_ScriptSocket as it is timing dependent\n");
++	return false;
++
+ 	bool fail = false;
+ 	CBufferedOutStream bout;
+ 	asIScriptEngine* engine;

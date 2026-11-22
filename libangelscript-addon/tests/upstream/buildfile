@@ -5,8 +5,10 @@ import libs  = libangelscript-addon%lib{angelscript-addon}
 for d : dir{test_* -test_build_performance}
 {
   n = $name($d)
-  ./: exe{$(n)_exe}: libul{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} \
-                     $libs
+  ./: exe{$(n)_exe}: libul{$(n)_exe}: \
+    add_on/hxx{**} \
+    $n/{hxx cxx}{source/** -source/teststdstring -source/test_addon_scriptsocket} \
+    $libs
 }
 
 # Only test_feature is run as a test, the performance tests are benchmarks.
@@ -24,11 +26,12 @@ exe{test_feature_exe}: file{test_feature/bin/scripts/**}: include = adhoc
 #
 libul{*}: bin.whole = true
 
-# Patched copy of test_feature/source/teststdstring.cpp (see .patch), with
-# utils.h and scriptstring.h shims so that its #include "utils.h" resolves
-# next to it.
+# Patched copies of test_feature/source/ files (see the .patch files), with
+# utils.h and scriptstring.h shims so that their #include "utils.h" resolves
+# next to them.
 #
-exe{test_feature_exe}: cxx{teststdstring} hxx{utils scriptstring}
+exe{test_feature_exe}: cxx{teststdstring test_addon_scriptsocket} \
+                       hxx{utils scriptstring}
 
 # test_build_performance is Windows-only.
 #
