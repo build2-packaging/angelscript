@@ -21,7 +21,7 @@ import libs = libangelscript%lib{angelscript}
 ```
 
 
-## Importable Targets
+## Importable targets
 
 This package provides the following importable targets:
 
@@ -33,7 +33,9 @@ The `lib{angelscript}` target provides the AngelScript scripting engine. Link ag
 it to embed a script engine in your application.
 
 
-## Configuration Variables
+## Configuration variables
+
+This package provides the following configuration variables:
 
 ```
 [bool] config.libangelscript.no_exceptions ?= false

@@ -29,12 +29,13 @@ import libs = libangelscript-addon%lib{angelscript-scriptarray}
 ```
 
 
-## Importable Targets
+## Importable targets
 
 This package provides the following importable targets:
 
 ```
 lib{angelscript-addon}
+exe{angelscript-generateheader}
 ```
 
 The `lib{angelscript-addon}` aggregate target bundles all addon modules into a
@@ -61,13 +62,6 @@ lib{angelscript-serializer}
 lib{angelscript-weakref}
 ```
 
-
-## Utility Programs
-
-```
-exe{angelscript-generateheader}
-```
-
 `exe{angelscript-generateheader}` is a code generator that produces `aswrappedcall.h`
 (the `autowrapper` implementation) by writing it to stdout:
 
@@ -78,6 +72,6 @@ angelscript-generateheader > aswrappedcall.h
 This is an upstream developer tool.
 
 
-## Configuration Variables
+## Configuration variables
 
 This package provides no configuration variables.
