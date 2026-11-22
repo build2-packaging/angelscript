@@ -85,11 +85,15 @@ if ($cxx.target.class == 'macos')
   obj{test_feature/source/test_registertype}: \
     cxx.poptions += '-Dmemalign(a,s)=({void*p=nullptr;posix_memalign(&p,a,s)==0?p:nullptr;})'
 }
-if ($cxx.target.class != 'windows')
+if ($cxx.class == 'gcc')
 {
-  switch $cxx.id: path.match
-  {
-    case 'gcc' | 'clang*'
+  # test_registertype.cpp uses std:: math functions without including <cmath>.
+  #
+  if ($cxx.target.class != 'windows')
+    obj{test_feature/source/test_registertype}: \
       cxx.coptions += -include 'cmath'
-  }
+
+  # test_saveload.cpp reads an asQWORD through int* (type punning).
+  #
+  obj{test_feature/source/test_saveload}: cxx.coptions += -fno-strict-aliasing
 }
