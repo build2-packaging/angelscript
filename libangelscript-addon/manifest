@@ -18,3 +18,4 @@ package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
 depends: libangelscript == $
+build-exclude: freebsd** ; Upstream test_feature suite times out.
