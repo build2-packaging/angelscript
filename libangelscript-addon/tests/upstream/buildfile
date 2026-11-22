@@ -19,9 +19,11 @@ exe{*}: test = false
 #
 libul{*}: bin.whole = true
 
-# teststdstring.cpp is broken in newer C++, so no-op it.
+# Patched copy of test_feature/source/teststdstring.cpp (see .patch), with
+# utils.h and scriptstring.h shims so that its #include "utils.h" resolves
+# next to it.
 #
-exe{test_feature_exe}: cxx{teststdstring}
+exe{test_feature_exe}: cxx{teststdstring} hxx{utils scriptstring}
 
 # test_build_performance is Windows-only.
 #
