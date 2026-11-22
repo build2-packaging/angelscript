@@ -1,4 +1,13 @@
-: angelscript addon tests
+: Upstream test_feature suite. It opens scripts/ and ../bin/scripts/ relative
+: to the current directory, so run it in bin/ with the upstream scripts linked
+: in. On MinGW the script builder add-on takes the executable's directory as
+: the current directory (see GetCurrentDir() in scriptbuilder.cpp), so run a
+: link to the executable in bin/.
+:
 {
-  true | $* >! 2>|
+  mkdir bin
+  ln -s $src_base/test_feature/bin/scripts/ bin/scripts
+  exe = $~/bin/$leaf($0)
+  ln $0 $exe
+  env -c bin -- $exe 1>!
 }

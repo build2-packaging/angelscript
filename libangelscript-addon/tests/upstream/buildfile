@@ -6,13 +6,18 @@ for d : dir{test_* -test_build_performance}
 {
   n = $name($d)
   ./: exe{$(n)_exe}: libul{$(n)_exe}: add_on/hxx{**} $n/{hxx cxx}{source/** -source/teststdstring} \
-                     $libs testscript
+                     $libs
 }
 
-# We disable all tests for now as they require further setup (e.g. symlink to
-# test_feature/bin/scripts dir).
+# Only test_feature is run as a test, the performance tests are benchmarks.
 #
 exe{*}: test = false
+exe{test_feature_exe}: test = true
+exe{test_feature_exe}: testscript
+
+# Scripts that test_feature opens by relative path (see testscript).
+#
+exe{test_feature_exe}: file{test_feature/bin/scripts/**}: include = adhoc
 
 # Upstream tests register test suites via static initializers; keep whole-archive
 # so all objects are linked even if unreferenced.
@@ -29,7 +34,7 @@ exe{test_feature_exe}: cxx{teststdstring} hxx{utils scriptstring}
 #
 ./: exe{test_build_performance_exe}: include = ($cxx.target.class == 'windows')
 exe{test_build_performance_exe}: libul{test_build_performance_exe}: \
-  add_on/hxx{**} test_build_performance/{hxx cxx}{source/**} $libs testscript
+  add_on/hxx{**} test_build_performance/{hxx cxx}{source/**} $libs
 obj{test_build_performance/**}: \
   cxx.poptions += "-I$src_base/test_build_performance/source"
 
