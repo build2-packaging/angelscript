@@ -189,6 +189,11 @@ switch $cxx.id: path.match
 
     if ($cxx.id == 'gcc')
       cxx.coptions += -Wno-maybe-uninitialized
+
+    # Upstream relies on type punning (see ARG_DW() and friends in
+    # as_config.h) and builds with -fno-strict-aliasing (projects/gnuc/).
+    #
+    cxx.coptions += -fno-strict-aliasing
   }
   case 'msvc*'
     cxx.poptions += -D_CRT_SECURE_NO_WARNINGS \
